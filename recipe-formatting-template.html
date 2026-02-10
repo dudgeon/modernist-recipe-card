@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe — Modernist Cuisine Style</title>
+<style>
+  /* ===== BASE RESET & TYPOGRAPHY ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #2c2c2c;
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== RECIPE CONTAINER ===== */
+  .recipe {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 48px 40px 64px;
+  }
+
+  .recipe + .recipe {
+    border-top: 3px double #d4d0c8;
+    margin-top: 64px;
+    padding-top: 64px;
+  }
+
+  /* ===== HEADER ZONE ===== */
+  .recipe-category {
+    display: block;
+    font-size: 13px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #8b7355;
+    margin-bottom: 4px;
+  }
+
+  .recipe-title {
+    font-family: Georgia, serif;
+    font-size: 32px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2c2c2c;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+
+  /* ===== METADATA BLOCK ===== */
+  .recipe-metadata {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 6px 24px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #d4d0c8;
+  }
+
+  .meta-label {
+    font-size: 13px;
+    font-variant: small-caps;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b6b6b;
+    padding: 2px 0;
+  }
+
+  .meta-value {
+    font-style: italic;
+    padding: 2px 0;
+  }
+
+  /* ===== INTRODUCTION / HEADNOTE ===== */
+  .recipe-intro {
+    margin-bottom: 32px;
+  }
+
+  .recipe-intro.two-column {
+    column-count: 2;
+    column-gap: 40px;
+  }
+
+  .recipe-intro p {
+    margin-bottom: 12px;
+  }
+
+  /* ===== SECTION HEADERS ===== */
+  .section-header {
+    font-family: Georgia, serif;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #2c2c2c;
+    border-top: 1px solid #999;
+    padding-top: 12px;
+    margin-top: 36px;
+    margin-bottom: 20px;
+  }
+
+  /* ===== INGREDIENTS TABLE (standalone, Format A) ===== */
+  .ingredients-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+  }
+
+  .ingredients-table th {
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #2c2c2c;
+    border-bottom: 1.5px solid #999;
+    padding: 6px 16px 6px 0;
+  }
+
+  .ingredients-table td {
+    padding: 7px 16px 7px 0;
+    border-bottom: 1px solid #d4d0c8;
+    vertical-align: top;
+    font-size: 15px;
+  }
+
+  .ingredients-table .col-weight,
+  .ingredients-table .col-volume {
+    white-space: nowrap;
+  }
+
+  .ingredients-table .col-scaling,
+  .ingredients-table th.col-scaling {
+    text-align: right;
+    padding-right: 0;
+  }
+
+  .yield-line {
+    text-align: center;
+    font-size: 14px;
+    color: #6b6b6b;
+    padding: 12px 0;
+    border-bottom: 1px solid #d4d0c8;
+    margin-bottom: 24px;
+  }
+
+  /* ===== TWO-COLUMN BODY LAYOUT ===== */
+  .recipe-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 40px;
+    align-items: start;
+  }
+
+  /* ===== FORMAT A: LABELED STEPS ===== */
+  .labeled-steps {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0;
+  }
+
+  .step-label {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 10px 16px 10px 0;
+    vertical-align: top;
+    line-height: 1.65;
+    color: #2c2c2c;
+  }
+
+  .step-description {
+    padding: 10px 0;
+    line-height: 1.65;
+    font-size: 15px;
+  }
+
+  /* ===== FORMAT B: INTEGRATED INGREDIENT-PROCEDURE TABLE ===== */
+  .integrated-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+
+  .integrated-table th {
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #2c2c2c;
+    border-bottom: 1.5px solid #999;
+    padding: 6px 14px 6px 0;
+  }
+
+  .integrated-table td {
+    padding: 5px 14px 5px 0;
+    vertical-align: top;
+    font-size: 15px;
+    border-bottom: 1px solid #e8e6e1;
+  }
+
+  .integrated-table tr.ingredient-group-start td {
+    border-top: 1.5px solid #999;
+    padding-top: 12px;
+  }
+
+  .integrated-table tr.continuation td.ing-cell,
+  .integrated-table tr.continuation td.wt-cell,
+  .integrated-table tr.continuation td.vol-cell,
+  .integrated-table tr.continuation td.scale-cell {
+    border-bottom-color: transparent;
+  }
+
+  .integrated-table .procedure-cell {
+    padding-left: 8px;
+    line-height: 1.55;
+  }
+
+  .integrated-table .step-num {
+    display: inline-block;
+    width: 22px;
+    font-size: 15px;
+  }
+
+  .integrated-table .col-procedure {
+    width: 45%;
+  }
+
+  /* ===== TECHNIQUE NOTES ===== */
+  .technique-notes {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #d4d0c8;
+  }
+
+  .technique-notes p {
+    margin-bottom: 12px;
+  }
+
+  .technique-notes.two-column {
+    column-count: 2;
+    column-gap: 40px;
+  }
+
+  /* ===== REFERENCE TABLE ===== */
+  .reference-table-section {
+    margin-top: 40px;
+  }
+
+  .reference-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .reference-table th {
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-style: italic;
+    border-bottom: 1.5px solid #999;
+    padding: 6px 16px 6px 0;
+  }
+
+  .reference-table td {
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid #d4d0c8;
+    vertical-align: top;
+    font-size: 14px;
+  }
+
+  /* ===== FOOTNOTES ===== */
+  .footnotes {
+    margin-top: 28px;
+    padding-top: 16px;
+    font-size: 13px;
+    color: #6b6b6b;
+    line-height: 1.55;
+  }
+
+  .footnotes p {
+    margin-bottom: 6px;
+  }
+
+  /* ===== SIDEBAR BOXES (Format A baking recipes) ===== */
+  .sidebar-boxes {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .sidebar-box {
+    border: 1px solid #d4d0c8;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 160px;
+  }
+
+  .sidebar-box-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6b6b6b;
+    margin-bottom: 8px;
+  }
+
+  .sidebar-box-value {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ===== NET CONTENTS TABLE (Format A) ===== */
+  .net-contents {
+    margin-bottom: 24px;
+  }
+
+  .net-contents-header {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    color: #2c2c2c;
+  }
+
+  .net-contents table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .net-contents th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-style: italic;
+    border-bottom: 1.5px solid #999;
+    padding: 4px 12px 4px 0;
+  }
+
+  .net-contents td {
+    padding: 5px 12px 5px 0;
+    border-bottom: 1px solid #d4d0c8;
+    font-size: 14px;
+  }
+
+  /* ===== HEADER + SIDEBAR LAYOUT (Format A) ===== */
+  .header-with-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 40px;
+    align-items: start;
+  }
+
+  /* ===== PRINT STYLES ===== */
+  @media print {
+    body { background: white; }
+    .recipe { padding: 24px 0; max-width: none; }
+    .recipe + .recipe { page-break-before: always; border-top: none; margin-top: 0; padding-top: 24px; }
+    .section-header { page-break-after: avoid; }
+    .ingredients-table, .integrated-table, .reference-table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     FORMAT A EXAMPLE: Neapolitan Pizza Dough (Labeled Steps)
+     Use for baking/bread/pastry recipes with distinct named phases
+     ============================================================ -->
+<div class="recipe">
+
+  <div class="header-with-sidebar">
+    <div>
+      <span class="recipe-category">Master Recipe</span>
+      <h1 class="recipe-title">Neapolitan Pizza Dough</h1>
+
+      <table class="ingredients-table">
+        <thead>
+          <tr>
+            <th>Ingredients</th>
+            <th class="col-weight">Weight</th>
+            <th class="col-volume">Volume</th>
+            <th class="col-scaling">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Water, 21°C / 70°F</td>
+            <td class="col-weight">380 g</td>
+            <td class="col-volume">1⅔ cups</td>
+            <td class="col-scaling">62.3</td>
+          </tr>
+          <tr>
+            <td>Instant dry yeast</td>
+            <td class="col-weight">0.24 g</td>
+            <td class="col-volume">⅛ tsp</td>
+            <td class="col-scaling">0.04</td>
+          </tr>
+          <tr>
+            <td>Bread flour, 11.5%–12.5% protein, or 00 flour*</td>
+            <td class="col-weight">610 g</td>
+            <td class="col-volume">4½ cups</td>
+            <td class="col-scaling">100</td>
+          </tr>
+          <tr>
+            <td>Adolph's meat tenderizer (optional)</td>
+            <td class="col-weight">0.06 g</td>
+            <td class="col-volume">**</td>
+            <td class="col-scaling">0.01</td>
+          </tr>
+          <tr>
+            <td>Fine salt</td>
+            <td class="col-weight">12.15 g</td>
+            <td class="col-volume">2⅙ tsp</td>
+            <td class="col-scaling">1.99</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="yield-line">Yield: ~1 kg</div>
+
+      <div class="footnotes">
+        <p>*We recommend using Le 5 Stagioni Pizza Napoletana 00 Flour, Caputo Pizzeria 00 Flour, or Polselli Classica 00 Flour.</p>
+        <p>**You can approximate this small amount of dough relaxer by measuring ⅙ tsp meat tenderizer and dividing it into six equal parts. Use one part per batch.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-boxes">
+        <div class="sidebar-box">
+          <div class="sidebar-box-label">Total Time</div>
+          <div class="sidebar-box-value">Active 15–20 min /<br>Inactive 27 h</div>
+        </div>
+        <div class="sidebar-box">
+          <div class="sidebar-box-label">Yield / Shape</div>
+          <div class="sidebar-box-value">four 30 cm / 12 in pizzas</div>
+        </div>
+      </div>
+
+      <div class="net-contents">
+        <div class="net-contents-header">Net Contents</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Ingredients</th>
+              <th>Weight</th>
+              <th style="text-align:right">%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Flour</td><td>610 g</td><td style="text-align:right">100</td></tr>
+            <tr><td>Water</td><td>380 g</td><td style="text-align:right">62.3</td></tr>
+            <tr><td>Salt</td><td>12.15 g</td><td style="text-align:right">1.99</td></tr>
+            <tr><td>Yeast</td><td>0.24 g</td><td style="text-align:right">0.04</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size:14px; line-height:1.55;">We typically use a dough hook to mix all our medium-crust pizza doughs. If the ingredient quantities aren't large enough for the dough hook to mix them well in a stand mixer or commercial planetary mixer, use a paddle attachment initially to mix the ingredients uniformly. Once you have a homogeneous mass (the dough is sticky and wet, and there are no visible clumps or unincorporated water), switch to a hook attachment.</p>
+    </div>
+  </div>
+
+  <p style="margin: 20px 0; font-size: 14px; line-height: 1.55;">The meat tenderizer acts as a dough relaxer. It is optional, but we highly recommend it because it makes the dough easier to shape. Additionally, if you overproof the dough, you can reball it, proof it, and bake it. Without the dough relaxer, it would be hard to handle.</p>
+
+  <h2 class="section-header">General Directions</h2>
+
+  <div class="recipe-body-grid">
+    <div class="labeled-steps">
+      <div class="step-label">Mix</div>
+      <div class="step-description">Combine the water and yeast in the mixer's bowl, and whisk to dissolve the yeast; add the flour and meat tenderizer, and mix on low speed to a shaggy mass; add the salt, and mix on medium speed to full gluten development; perform the windowpane test to assess gluten development; transfer to a tub lightly misted with water.</div>
+
+      <div class="step-label">Bulk Ferment</div>
+      <div class="step-description">20–24 h at 21°C / 70°F; cover well.</div>
+
+      <div class="step-label">Divide</div>
+      <div class="step-description">250 g</div>
+
+      <div class="step-label">Preshape</div>
+      <div class="step-description">Ball; place in a tub or on a sheet pan; lightly mist with water; cover well.</div>
+
+      <div class="step-label">Proof</div>
+      <div class="step-description">3 h at 21°C / 70°F, covered.</div>
+
+      <div class="step-label">Shape</div>
+      <div class="step-description">Temper any sauce and cheese 2 h before topping the pizza; lightly flour your worktable, if needed; lift the pizza dough from its tub using a narrow, sharp bench knife; place it on the worktable, seam side up; dust the top lightly with more flour; press down on the dough with your fingers, leaving a 1.25–2.5 cm / 0.5–1 in border; rotate the dough 180° and press down again, leaving the same border; the point is to create an even disc that is flat in the center and has an even rim; flip the dough over and flatten the center again, pushing the dough in an outward motion to extend the central part; it should be 15–20 cm / 6–8 in. in diameter; place the dough disc on the backs of your hands so that the smooth side is in contact with your hands; stretch your hands apart gently, rotating the dough 90° as you stretch farther and farther; keep stretching the dough until it reaches 30 cm / 12 in. in diameter.</div>
+    </div>
+
+    <div class="labeled-steps">
+      <div class="step-label">Assemble</div>
+      <div class="step-description">Use an offset spatula, sauce spoon, or concave silicone spatula to spread the sauce evenly over the dough, leaving a 2.5 cm / 1 in border; distribute the cheese evenly over the sauce; distribute the toppings evenly over the cheese.</div>
+
+      <div class="step-label">Bake</div>
+      <div class="step-description">Slide the dough onto a peel or slide the peel at about a 5° angle under the dough, using quick, jerking back-and-forth motions, until it is completely on the peel; reshape the dough into a circle, if necessary; load into the oven with a quick pull-away motion; once the dough starts to brown, start spinning the pizza; bake according to the Neapolitan Pizza Baking Times and Temperatures table (see below) until the rim is evenly leoparded throughout; check the doneness of the bottom of the pizza; remove the pizza and place on a serving tray; serve the pizza whole or cut into 6 triangles.</div>
+    </div>
+  </div>
+
+  <div class="technique-notes two-column">
+    <p>The larger the yield, the longer the dough will take to mix. Final mix time at higher speeds may vary from machine to machine. Whatever the model and yield, the goal is to achieve a good mix and full gluten development. Full gluten development should coincide with a final dough temperature of 27°C / 80°F.</p>
+    <p>To assess gluten development, perform the windowpane test. Take a portion of dough in your hands and stretch it: the more the dough can stretch without tearing, the more the gluten has developed. The dough will hold the window for at least 8–10 seconds and it can be stretched to the point that it is nearly see-through when it has reached full gluten development.</p>
+    <p>We recommend 120 g sauce, 100 g cheese, and 125–150 g toppings for a 30 cm / 12 in pizza. The volume measures will vary depending on what you choose to put on top of your dough.</p>
+  </div>
+
+  <div class="reference-table-section">
+    <h2 class="section-header">Neapolitan Pizza Baking Times and Temperatures</h2>
+    <table class="reference-table">
+      <thead>
+        <tr>
+          <th>Type of oven</th>
+          <th>Baking temperature</th>
+          <th>Baking time</th>
+          <th>Rotation notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>wood-fired or gas-fired pizza oven</td>
+          <td>preheat oven to 455°C / 850°F</td>
+          <td>1–1½ min</td>
+          <td>As soon as you see signs of leoparding begin to form, start rotating the pizza. We like to start spinning it after this initial pocking begins and then spin it for the duration of the baking time to produce the most even results.</td>
+        </tr>
+        <tr>
+          <td>pizza deck oven</td>
+          <td>preheat oven to 400°C / 750°F*; vent halfway open</td>
+          <td>2½–3 min</td>
+          <td>180° 4–6 times during baking</td>
+        </tr>
+        <tr>
+          <td>bread deck oven</td>
+          <td>preheat oven to 260–315°C / 500–600°F</td>
+          <td>3–4 min</td>
+          <td>90° every 1 min</td>
+        </tr>
+        <tr>
+          <td>home / still electric oven: place baking steel or baking stone in the top third of the oven</td>
+          <td>preheat oven to 285°C / 550°F for 30 min</td>
+          <td>7–8 min</td>
+          <td>180° halfway through baking</td>
+        </tr>
+        <tr>
+          <td>convection oven: place baking steel or baking stone in the center of the oven</td>
+          <td>preheat oven to 285°C / 550°F for 15–20 min; fan on high speed</td>
+          <td>4–6 min</td>
+          <td>180° halfway through baking</td>
+        </tr>
+        <tr>
+          <td>combi oven: place baking steel or baking stone 10 cm / 4 in from broiler</td>
+          <td>preheat oven to 285°C / 550°F for 10–15 min; fan on high speed; switch to high broil 5 min before baking</td>
+          <td>4–4½ min</td>
+          <td>180° halfway through baking</td>
+        </tr>
+        <tr>
+          <td>impinger oven</td>
+          <td>preheat oven to 315°C / 600°F</td>
+          <td>2–2½ min</td>
+          <td>n/a</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="footnotes">
+      <p>*Some models, like the PizzaMaster, can go up to 455°C / 850°F. We recommend baking Neapolitan pizza for 3 min in this oven.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     FORMAT B EXAMPLE: Caramelized Carrot Soup (Integrated Table)
+     Use for sequential recipes where ingredients enter at different stages
+     ============================================================ -->
+<div class="recipe">
+
+  <span class="recipe-category">Soup</span>
+  <h1 class="recipe-title">Caramelized Carrot Soup</h1>
+
+  <div class="recipe-metadata">
+    <div class="meta-label">Yield</div>
+    <div class="meta-value">six servings (1.3 kg / 6 cups)</div>
+    <div class="meta-label">Time Estimate</div>
+    <div class="meta-value">40 minutes overall, including 20 minutes of preparation and 20 minutes unattended</div>
+    <div class="meta-label">Storage Notes</div>
+    <div class="meta-value">keeps for 3 days when refrigerated or up to 2 months when frozen</div>
+    <div class="meta-label">Level of Difficulty</div>
+    <div class="meta-value">moderate</div>
+    <div class="meta-label">Special Requirements</div>
+    <div class="meta-value">pressure cooker, Stove-Top Carotene Butter (optional, see page 121)</div>
+  </div>
+
+  <div class="recipe-intro two-column">
+    <p>The quality of this soup depends entirely on the quality of the carrots that go into it, so use the highest-quality carrots you can find. Carrot cores, rich in calcium, can add a bitter taste and unpleasant texture to this delicate soup, so we always remove them. It's an optional step, however; you can try the soup both ways and compare.</p>
+    <p>Add a swirl of coconut cream and a few sprigs of tarragon in the final step to enhance the inherent sweetness of the carrots. Shredded young coconut and ajowan seeds are other favorite garnishes of ours.</p>
+  </div>
+
+  <table class="integrated-table">
+    <thead>
+      <tr>
+        <th>Ingredient</th>
+        <th>Weight</th>
+        <th>Volume</th>
+        <th>Scaling</th>
+        <th class="col-procedure">Procedure</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="ingredient-group-start">
+        <td class="ing-cell">Carrots, peeled</td>
+        <td class="wt-cell">500 g</td>
+        <td class="vol-cell">5 cups / 5 medium</td>
+        <td class="scale-cell">100%</td>
+        <td class="procedure-cell"><span class="step-num">&#9312;</span> Core the carrots by quartering them lengthwise and slicing away any tough or fibrous cores. Cut the cored carrots into pieces 5 cm / 2 in long.</td>
+      </tr>
+      <tr class="ingredient-group-start">
+        <td class="ing-cell">Unsalted butter</td>
+        <td class="wt-cell">113 g</td>
+        <td class="vol-cell">&frac12; cup</td>
+        <td class="scale-cell">22.6%</td>
+        <td class="procedure-cell"><span class="step-num">&#9313;</span> Melt in the base of a pressure cooker over medium heat.</td>
+      </tr>
+      <tr class="ingredient-group-start">
+        <td class="ing-cell">Water</td>
+        <td class="wt-cell">30 g</td>
+        <td class="vol-cell">30 mL / &#8539; cup</td>
+        <td class="scale-cell">6%</td>
+        <td class="procedure-cell" rowspan="3"><span class="step-num">&#9314;</span> Stir to combine, and then add with the carrots to the melted butter.</td>
+      </tr>
+      <tr>
+        <td class="ing-cell">Salt</td>
+        <td class="wt-cell">5 g</td>
+        <td class="vol-cell">1&frac14; tsp</td>
+        <td class="scale-cell">1%</td>
+      </tr>
+      <tr>
+        <td class="ing-cell">Baking soda</td>
+        <td class="wt-cell">2.5 g</td>
+        <td class="vol-cell">&#8540; tsp</td>
+        <td class="scale-cell">0.5%</td>
+      </tr>
+      <tr class="continuation">
+        <td class="ing-cell"></td>
+        <td class="wt-cell"></td>
+        <td class="vol-cell"></td>
+        <td class="scale-cell"></td>
+        <td class="procedure-cell"><span class="step-num">&#9315;</span> Pressure-cook at a gauge pressure of 1 bar / 15 psi for 20 minutes. Start timing when full pressure is reached.</td>
+      </tr>
+      <tr class="continuation">
+        <td class="ing-cell"></td>
+        <td class="wt-cell"></td>
+        <td class="vol-cell"></td>
+        <td class="scale-cell"></td>
+        <td class="procedure-cell"><span class="step-num">&#9316;</span> Depressurize the cooker quickly by running tepid water over the rim.</td>
+      </tr>
+      <tr class="continuation">
+        <td class="ing-cell"></td>
+        <td class="wt-cell"></td>
+        <td class="vol-cell"></td>
+        <td class="scale-cell"></td>
+        <td class="procedure-cell"><span class="step-num">&#9317;</span> Blend the mixture to a smooth puree.</td>
+      </tr>
+      <tr class="continuation">
+        <td class="ing-cell"></td>
+        <td class="wt-cell"></td>
+        <td class="vol-cell"></td>
+        <td class="scale-cell"></td>
+        <td class="procedure-cell"><span class="step-num">&#9318;</span> Pass the puree through a fine sieve into a pot.</td>
+      </tr>
+      <tr class="ingredient-group-start">
+        <td class="ing-cell">Fresh carrot juice</td>
+        <td class="wt-cell">635 g</td>
+        <td class="vol-cell">690 mL / 2&frac12; cups</td>
+        <td class="scale-cell">127%</td>
+        <td class="procedure-cell"><span class="step-num">&#9319;</span> Bring to a boil in a separate pot, and then strain through a fine sieve.</td>
+      </tr>
+      <tr class="continuation">
+        <td class="ing-cell"></td>
+        <td class="wt-cell"></td>
+        <td class="vol-cell"></td>
+        <td class="scale-cell"></td>
+        <td class="procedure-cell"><span class="step-num">&#9320;</span> Stir into the carrot puree. Add water, if necessary, to thin the soup to the desired consistency.</td>
+      </tr>
+      <tr class="ingredient-group-start">
+        <td class="ing-cell">Stove-Top Carotene Butter<br><small style="color:#6b6b6b">(or unsalted butter, see page 121)</small></td>
+        <td class="wt-cell">40 g</td>
+        <td class="vol-cell">3&frac12; Tbsp</td>
+        <td class="scale-cell">8%</td>
+        <td class="procedure-cell"><span class="step-num">&#9321;</span> Blend into the soup by using an immersion blender until the butter has just melted.</td>
+      </tr>
+      <tr class="ingredient-group-start">
+        <td class="ing-cell">Salt</td>
+        <td class="wt-cell" style="color:#6b6b6b">to taste</td>
+        <td class="vol-cell"></td>
+        <td class="scale-cell"></td>
+        <td class="procedure-cell"><span class="step-num">&#9322;</span> Season, and serve warm.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footnotes">
+    <p><em>Safety tips for pressure-cooking: see page 33</em></p>
+  </div>
+</div>
+
+</body>
+</html>
