@@ -1,0 +1,6 @@
+name = "modernist-recipe-api"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Set your API key as a secret (never in this file):
+#   npx wrangler secret put ANTHROPIC_API_KEY
