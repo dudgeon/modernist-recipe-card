@@ -215,6 +215,7 @@
     font-size: 14px;
     color: #6b6b6b;
     font-style: italic;
+    transition: opacity 0.3s ease;
   }
 
   /* ===== ERROR ===== */
@@ -404,10 +405,18 @@
   }
   .footnotes p { margin-bottom: 6px; }
 
-  .sidebar-boxes { display: flex; gap: 20px; margin-bottom: 24px; }
+  .ingredient-list {
+    list-style: none; margin: 6px 0 0; padding: 0;
+  }
+  .ingredient-list li::before {
+    content: "\2014\00a0";
+  }
+  .ingredient-list li { margin-bottom: 2px; }
+
+  .sidebar-boxes { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 24px; }
   .sidebar-box {
     border: 1px solid #d4d0c8; padding: 16px 20px;
-    text-align: center; min-width: 160px;
+    text-align: center; flex: 1 1 0; min-width: 0;
   }
   .sidebar-box-label {
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
@@ -520,6 +529,38 @@
   const outputSection  = document.getElementById('output-section');
   const recipeOutput   = document.getElementById('recipe-output');
   const errorMessage   = document.getElementById('error-message');
+  const loadingText    = document.querySelector('.loading-text');
+
+  // ---------------------------------------------------------------------------
+  // Loading word cycler
+  // ---------------------------------------------------------------------------
+  const LOADING_WORDS = [
+    'Formatting', 'Chopping', 'Blanching', 'Simmering', 'Mise en placing',
+    'Reducing', 'Folding', 'Whisking', 'Braising', 'Deglazing',
+    'Plating', 'Tempering', 'Searing', 'Dicing', 'Emulsifying',
+  ];
+  let loadingInterval = null;
+
+  function startLoadingCycler() {
+    let i = 0;
+    loadingText.textContent = LOADING_WORDS[0] + '\u2026';
+    loadingInterval = setInterval(() => {
+      loadingText.style.opacity = '0';
+      setTimeout(() => {
+        i = (i + 1) % LOADING_WORDS.length;
+        loadingText.textContent = LOADING_WORDS[i] + '\u2026';
+        loadingText.style.opacity = '1';
+      }, 300);
+    }, 2000);
+  }
+
+  function stopLoadingCycler() {
+    if (loadingInterval) {
+      clearInterval(loadingInterval);
+      loadingInterval = null;
+    }
+    loadingText.style.opacity = '1';
+  }
 
   const urlInput  = document.getElementById('url-input');
   const textInput = document.getElementById('text-input');
@@ -599,6 +640,7 @@
     }
 
     showView(loadingSection);
+    startLoadingCycler();
 
     try {
       const res = await fetch(WORKER_URL + '/api/format-recipe', {
@@ -613,9 +655,11 @@
         throw new Error(data.error || `Request failed (${res.status})`);
       }
 
+      stopLoadingCycler();
       recipeOutput.innerHTML = data.html;
       showView(outputSection);
     } catch (err) {
+      stopLoadingCycler();
       showError(err.message);
     }
   }

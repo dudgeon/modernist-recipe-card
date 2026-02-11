@@ -89,6 +89,10 @@ Labels: uppercase small-caps muted gray. Values: italic serif.
 
 ### 5. Procedure — Two Formats
 
+**Ingredient names in directions:** In all procedure text (both formats), wrap ingredient names in `<strong>` tags to make them stand out. E.g. "Add **butter** and **garlic**..."
+
+**Combine steps with many ingredients:** When a step combines 3 or more ingredients, list them as em-dash bullets using `<ul class="ingredient-list">` instead of inline prose.
+
 #### Format A: Labeled Steps (baking, multi-phase recipes)
 Two-column: bold uppercase keyword label (~140px left), prose description (right).
 

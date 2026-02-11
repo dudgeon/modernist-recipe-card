@@ -61,6 +61,18 @@ Columns: INGREDIENT | WEIGHT | VOLUME | SCALING (%)
 
 ### 5. Procedure — Two Formats
 
+**Ingredient names in directions:** In all procedure text (both formats), wrap ingredient names in \`<strong>\` tags to make them stand out. E.g. "Add <strong>butter</strong> and <strong>garlic</strong>..."
+
+**Combine steps with many ingredients:** When a step combines 3 or more ingredients, list them as em-dash bullets using \`<ul class="ingredient-list">\` instead of inline prose. E.g.:
+\`\`\`html
+<span class="step-num">③</span> Combine:
+<ul class="ingredient-list">
+  <li><strong>salt</strong></li>
+  <li><strong>pepper</strong></li>
+  <li><strong>garlic powder</strong></li>
+</ul>
+\`\`\`
+
 #### Format A: Labeled Steps (baking, multi-phase recipes)
 Two-column: bold uppercase keyword label (~140px left), prose description (right).
 Common labels: MIX, BULK FERMENT, DIVIDE, PRESHAPE, PROOF, SHAPE, ASSEMBLE, BAKE, REST, TEMPER, CHILL, FRY, REDUCE, STRAIN, SERVE
@@ -170,7 +182,7 @@ Use the exact CSS classes shown in the examples below.
   <div class="recipe-body-grid">
     <div class="labeled-steps">
       <div class="step-label">Mix</div>
-      <div class="step-description">Combine water and yeast; add flour; mix on low speed to a shaggy mass; add salt; mix on medium speed to full gluten development.</div>
+      <div class="step-description">Combine <strong>water</strong> and <strong>yeast</strong>; add <strong>flour</strong>; mix on low speed to a shaggy mass; add <strong>salt</strong>; mix on medium speed to full gluten development.</div>
       <div class="step-label">Bulk Ferment</div>
       <div class="step-description">20–24 h at 21°C / 70°F; cover well.</div>
       <div class="step-label">Divide</div>
@@ -238,14 +250,19 @@ Use the exact CSS classes shown in the examples below.
         <td class="wt-cell">113 g</td>
         <td class="vol-cell">½ cup</td>
         <td class="scale-cell">22.6%</td>
-        <td class="procedure-cell"><span class="step-num">②</span> Melt in the base of a pressure cooker over medium heat.</td>
+        <td class="procedure-cell"><span class="step-num">②</span> Melt <strong>butter</strong> in the base of a pressure cooker over medium heat.</td>
       </tr>
       <tr class="ingredient-group-start">
         <td class="ing-cell">Water</td>
         <td class="wt-cell">30 g</td>
         <td class="vol-cell">30 mL / ⅛ cup</td>
         <td class="scale-cell">6%</td>
-        <td class="procedure-cell" rowspan="3"><span class="step-num">③</span> Stir to combine, and add with the carrots to the melted butter.</td>
+        <td class="procedure-cell" rowspan="3"><span class="step-num">③</span> Combine and add to the <strong>carrots</strong> and melted <strong>butter</strong>:
+<ul class="ingredient-list">
+  <li><strong>water</strong></li>
+  <li><strong>salt</strong></li>
+  <li><strong>baking soda</strong></li>
+</ul></td>
       </tr>
       <tr>
         <td class="ing-cell">Salt</td>
@@ -278,7 +295,7 @@ Use the exact CSS classes shown in the examples below.
         <td class="wt-cell">635 g</td>
         <td class="vol-cell">690 mL / 2½ cups</td>
         <td class="scale-cell">127%</td>
-        <td class="procedure-cell"><span class="step-num">⑥</span> Bring to a boil, strain, and stir into the carrot puree.</td>
+        <td class="procedure-cell"><span class="step-num">⑥</span> Bring <strong>carrot juice</strong> to a boil, strain, and stir into the carrot puree.</td>
       </tr>
       <tr class="ingredient-group-start">
         <td class="ing-cell">Salt</td>
