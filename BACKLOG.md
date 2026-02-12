@@ -40,6 +40,10 @@ Items below are explicitly deferred. They may inform v1 decisions (e.g., data mo
 - [ ] Responsive typography scaling
 
 ### UX Improvements
+- [x] URL parameter support: `recipe_url` pre-fills input, `auto_process=1` triggers formatting on load
+- [x] Completion tracking: tap ingredients or steps to strikethrough (visual progress tracking)
+- [x] Single-column directions layout (easier to follow than 2-column)
+- [x] Structured markdown input: bypass LLM for recipes in known YAML+markdown schema
 - [ ] Recipe history (local storage)
 - [ ] Share formatted recipe via link
 - [ ] Manual recipe text input (paste raw text instead of URL)
