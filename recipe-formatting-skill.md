@@ -94,11 +94,9 @@ Labels: uppercase small-caps muted gray. Values: italic serif.
 **Combine steps with many ingredients:** When a step combines 3 or more ingredients, list them as em-dash bullets using `<ul class="ingredient-list">` instead of inline prose.
 
 #### Format A: Labeled Steps (baking, multi-phase recipes)
-Two-column: bold uppercase keyword label (~140px left), prose description (right).
+Single-column layout: bold uppercase keyword label (~120px left), prose description (right) in a two-column CSS grid (label + description). All steps in one continuous list — do NOT split into multiple columns.
 
 Common labels: MIX, BULK FERMENT, DIVIDE, PRESHAPE, PROOF, SHAPE, ASSEMBLE, BAKE, REST, TEMPER, CHILL, FRY, REDUCE, STRAIN, SERVE
-
-For many steps, arrange in a two-column grid of step pairs (steps 1-4 left, steps 5-8 right).
 
 #### Format B: Integrated Ingredient-Procedure Table (sequential recipes)
 Single table: INGREDIENT | WEIGHT | VOLUME | SCALING | PROCEDURE

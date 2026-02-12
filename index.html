@@ -353,7 +353,7 @@
   }
 
   .recipe-body-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: start;
+    display: grid; grid-template-columns: 1fr; gap: 0; align-items: start;
   }
 
   .labeled-steps { display: grid; grid-template-columns: 120px 1fr; gap: 0; }
@@ -443,6 +443,37 @@
     display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start;
   }
 
+  /* ===== COMPLETION TRACKING ===== */
+  .ingredients-table tbody tr,
+  .integrated-table tbody tr,
+  .labeled-steps .step-description,
+  .labeled-steps .step-label {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .ingredients-table tbody tr.completed td,
+  .integrated-table tbody tr.completed td {
+    color: #b0ada6;
+    text-decoration: line-through;
+    text-decoration-color: #b0ada6;
+  }
+
+  .labeled-steps .step-pair {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    cursor: pointer;
+  }
+
+  .labeled-steps .step-pair.completed .step-label,
+  .labeled-steps .step-pair.completed .step-description {
+    color: #b0ada6;
+    text-decoration: line-through;
+    text-decoration-color: #b0ada6;
+  }
+
   /* ===== PRINT ===== */
   @media print {
     body { background: white; }
@@ -453,6 +484,14 @@
     .recipe + .recipe { page-break-before: always; border-top: none; margin-top: 0; padding-top: 24px; }
     .section-header { page-break-after: avoid; }
     .ingredients-table, .integrated-table, .reference-table { page-break-inside: avoid; }
+    .completed td, .completed .step-label, .completed .step-description,
+    .ingredients-table tbody tr.completed td,
+    .integrated-table tbody tr.completed td,
+    .labeled-steps .step-pair.completed .step-label,
+    .labeled-steps .step-pair.completed .step-description {
+      color: #2c2c2c !important;
+      text-decoration: none !important;
+    }
   }
 </style>
 </head>
@@ -612,6 +651,16 @@
   textSubmit.addEventListener('click', () => {
     const text = textInput.value.trim();
     if (!text) return;
+
+    // Try structured markdown parsing first (no LLM needed)
+    const localHtml = tryParseStructuredMarkdown(text);
+    if (localHtml) {
+      recipeOutput.innerHTML = localHtml;
+      initCompletionTracking();
+      showView(outputSection);
+      return;
+    }
+
     formatRecipe({ text });
   });
 
@@ -657,6 +706,7 @@
 
       stopLoadingCycler();
       recipeOutput.innerHTML = data.html;
+      initCompletionTracking();
       showView(outputSection);
     } catch (err) {
       stopLoadingCycler();
@@ -668,6 +718,281 @@
     errorMessage.textContent = msg;
     showView(errorSection);
   }
+
+  // ---------------------------------------------------------------------------
+  // Structured Markdown parser (bypass LLM for known schema)
+  // ---------------------------------------------------------------------------
+  // Schema: YAML frontmatter (---) with title (required) + optional metadata,
+  // followed by markdown body with ## Ingredients, ## Directions, ## Notes.
+  //
+  // Frontmatter fields:
+  //   title (required), category, yield, time, storage, difficulty,
+  //   special_requirements, format (A|B)
+  //
+  // ## Ingredients — pipe-delimited table: Ingredient | Weight | Volume | Scaling
+  // ## Directions — "LABEL: description" lines (Format A) or numbered steps (Format B)
+  // ## Notes — free-form paragraphs
+
+  function tryParseStructuredMarkdown(text) {
+    // Must start with YAML frontmatter
+    const fmMatch = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+    if (!fmMatch) return null;
+
+    const meta = parseYamlFrontmatter(fmMatch[1]);
+    if (!meta || !meta.title) return null;
+
+    const body = fmMatch[2];
+    const sections = parseSections(body);
+
+    // Need at least ingredients or directions
+    if (!sections.ingredients && !sections.directions) return null;
+
+    const format = (meta.format || 'A').toUpperCase();
+    if (format === 'B' && sections.ingredients && sections.directions) {
+      return renderFormatB(meta, sections);
+    }
+    return renderFormatA(meta, sections);
+  }
+
+  function parseYamlFrontmatter(raw) {
+    const meta = {};
+    for (const line of raw.split('\n')) {
+      const m = line.match(/^\s*(\w[\w_]*)\s*:\s*(.+)$/);
+      if (m) meta[m[1].trim()] = m[2].trim();
+    }
+    return meta;
+  }
+
+  function parseSections(body) {
+    const result = { intro: '', ingredients: '', directions: '', notes: '' };
+    let current = 'intro';
+    for (const line of body.split('\n')) {
+      const heading = line.match(/^##\s+(.+)$/);
+      if (heading) {
+        const h = heading[1].toLowerCase().trim();
+        if (h.startsWith('ingredient')) current = 'ingredients';
+        else if (h.startsWith('direction') || h.startsWith('step') || h.startsWith('procedure')) current = 'directions';
+        else if (h.startsWith('note') || h.startsWith('technique')) current = 'notes';
+        else current = 'intro';
+        continue;
+      }
+      result[current] += line + '\n';
+    }
+    // Trim all
+    for (const k of Object.keys(result)) result[k] = result[k].trim();
+    return result;
+  }
+
+  function parseIngredientTable(raw) {
+    const rows = [];
+    for (const line of raw.split('\n')) {
+      // Skip header row and separator
+      if (line.match(/^\s*\|?\s*-+/) || line.match(/^\s*\|?\s*ingredient/i)) continue;
+      const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
+      if (cells.length >= 2) {
+        rows.push({
+          ingredient: cells[0] || '',
+          weight: cells[1] || '',
+          volume: cells[2] || '',
+          scaling: cells[3] || '',
+        });
+      }
+    }
+    return rows;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderMetadata(meta) {
+    const fields = [
+      ['yield', 'Yield'],
+      ['time', 'Time Estimate'],
+      ['storage', 'Storage Notes'],
+      ['difficulty', 'Level of Difficulty'],
+      ['special_requirements', 'Special Requirements'],
+    ];
+    let html = '';
+    for (const [key, label] of fields) {
+      if (meta[key]) {
+        html += `    <div class="meta-label">${escHtml(label)}</div>\n    <div class="meta-value">${escHtml(meta[key])}</div>\n`;
+      }
+    }
+    return html ? `  <div class="recipe-metadata">\n${html}  </div>\n` : '';
+  }
+
+  function renderIngredientsTable(rows) {
+    let html = '  <table class="ingredients-table">\n    <thead><tr>';
+    html += '<th>Ingredient</th><th class="col-weight">Weight</th><th class="col-volume">Volume</th><th class="col-scaling">%</th>';
+    html += '</tr></thead>\n    <tbody>\n';
+    for (const r of rows) {
+      html += `      <tr><td>${escHtml(r.ingredient)}</td><td class="col-weight">${escHtml(r.weight)}</td><td class="col-volume">${escHtml(r.volume)}</td><td class="col-scaling">${escHtml(r.scaling)}</td></tr>\n`;
+    }
+    html += '    </tbody>\n  </table>\n';
+    return html;
+  }
+
+  function renderIntro(text) {
+    if (!text) return '';
+    const paragraphs = text.split(/\n\n+/).filter(Boolean);
+    const cls = paragraphs.length > 2 ? ' two-column' : '';
+    return `  <div class="recipe-intro${cls}">\n${paragraphs.map((p) => `    <p>${escHtml(p)}</p>`).join('\n')}\n  </div>\n`;
+  }
+
+  function renderNotes(text) {
+    if (!text) return '';
+    const paragraphs = text.split(/\n\n+/).filter(Boolean);
+    const cls = paragraphs.length > 2 ? ' two-column' : '';
+    return `  <div class="technique-notes${cls}">\n${paragraphs.map((p) => `    <p>${escHtml(p)}</p>`).join('\n')}\n  </div>\n`;
+  }
+
+  function renderFormatA(meta, sections) {
+    const ingredients = sections.ingredients ? parseIngredientTable(sections.ingredients) : [];
+    let html = '<div class="recipe">\n';
+
+    // Header
+    if (meta.category) html += `  <span class="recipe-category">${escHtml(meta.category)}</span>\n`;
+    html += `  <h1 class="recipe-title">${escHtml(meta.title)}</h1>\n`;
+
+    // Metadata
+    html += renderMetadata(meta);
+
+    // Intro
+    html += renderIntro(sections.intro);
+
+    // Ingredients
+    if (ingredients.length) {
+      html += '  <h2 class="section-header">Ingredients</h2>\n';
+      html += renderIngredientsTable(ingredients);
+      if (meta.yield) html += `  <div class="yield-line">Yield: ${escHtml(meta.yield)}</div>\n`;
+    }
+
+    // Directions (labeled steps)
+    if (sections.directions) {
+      html += '  <h2 class="section-header">Directions</h2>\n';
+      html += '  <div class="labeled-steps">\n';
+      for (const line of sections.directions.split('\n')) {
+        const step = line.match(/^([A-Z][A-Z &/]+)\s*:\s*(.+)$/);
+        if (step) {
+          html += `    <div class="step-label">${escHtml(step[1])}</div>\n`;
+          html += `    <div class="step-description">${escHtml(step[2])}</div>\n`;
+        } else if (line.trim()) {
+          // Numbered step without label
+          const num = line.match(/^(\d+)\.\s*(.+)$/);
+          if (num) {
+            const circled = String.fromCodePoint(0x245F + parseInt(num[1], 10));
+            html += `    <div class="step-label">${circled}</div>\n`;
+            html += `    <div class="step-description">${escHtml(num[2])}</div>\n`;
+          }
+        }
+      }
+      html += '  </div>\n';
+    }
+
+    // Notes
+    html += renderNotes(sections.notes);
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderFormatB(meta, sections) {
+    const ingredients = parseIngredientTable(sections.ingredients);
+    const steps = [];
+    if (sections.directions) {
+      for (const line of sections.directions.split('\n')) {
+        const num = line.match(/^(\d+)\.\s*(.+)$/);
+        if (num) steps.push(num[2]);
+        else if (line.trim()) steps.push(line.trim());
+      }
+    }
+
+    const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+
+    let html = '<div class="recipe">\n';
+
+    // Header
+    if (meta.category) html += `  <span class="recipe-category">${escHtml(meta.category)}</span>\n`;
+    html += `  <h1 class="recipe-title">${escHtml(meta.title)}</h1>\n`;
+
+    // Metadata
+    html += renderMetadata(meta);
+
+    // Intro
+    html += renderIntro(sections.intro);
+
+    // Integrated table
+    html += '  <table class="integrated-table">\n    <thead><tr>';
+    html += '<th>Ingredient</th><th>Weight</th><th>Volume</th><th>Scaling</th><th class="col-procedure">Procedure</th>';
+    html += '</tr></thead>\n    <tbody>\n';
+
+    const maxRows = Math.max(ingredients.length, steps.length);
+    for (let i = 0; i < maxRows; i++) {
+      const ing = ingredients[i];
+      const step = steps[i];
+      const hasIng = ing && ing.ingredient;
+      const cls = hasIng ? ' class="ingredient-group-start"' : (i > 0 ? ' class="continuation"' : '');
+
+      html += `      <tr${cls}>`;
+      html += `<td class="ing-cell">${hasIng ? escHtml(ing.ingredient) : ''}</td>`;
+      html += `<td class="wt-cell">${hasIng ? escHtml(ing.weight) : ''}</td>`;
+      html += `<td class="vol-cell">${hasIng ? escHtml(ing.volume) : ''}</td>`;
+      html += `<td class="scale-cell">${hasIng ? escHtml(ing.scaling) : ''}</td>`;
+      html += `<td class="procedure-cell">${step ? `<span class="step-num">${CIRCLED[i] || (i + 1)}</span> ${escHtml(step)}` : ''}</td>`;
+      html += '</tr>\n';
+    }
+
+    html += '    </tbody>\n  </table>\n';
+
+    // Notes
+    html += renderNotes(sections.notes);
+
+    html += '</div>';
+    return html;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Completion tracking: tap to strikethrough ingredients/steps
+  // ---------------------------------------------------------------------------
+  function initCompletionTracking() {
+    // Ingredient table rows (both standalone and integrated)
+    recipeOutput.querySelectorAll('.ingredients-table tbody tr, .integrated-table tbody tr').forEach((row) => {
+      row.addEventListener('click', () => row.classList.toggle('completed'));
+    });
+
+    // Labeled steps: wrap adjacent label+description pairs for joint toggling
+    recipeOutput.querySelectorAll('.labeled-steps').forEach((grid) => {
+      const children = Array.from(grid.children);
+      for (let i = 0; i < children.length; i += 2) {
+        const label = children[i];
+        const desc = children[i + 1];
+        if (!label || !desc) break;
+        const pair = document.createElement('div');
+        pair.className = 'step-pair';
+        grid.insertBefore(pair, label);
+        pair.appendChild(label);
+        pair.appendChild(desc);
+        pair.addEventListener('click', () => pair.classList.toggle('completed'));
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // URL parameter handlers: recipe_url and auto_process
+  // ---------------------------------------------------------------------------
+  (function handleUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const recipeUrl = params.get('recipe_url');
+    const autoProcess = params.get('auto_process');
+
+    if (recipeUrl) {
+      urlInput.value = recipeUrl;
+      if (autoProcess === '1' || autoProcess === 'true') {
+        formatRecipe({ url: recipeUrl });
+      }
+    }
+  })();
 </script>
 
 </body>

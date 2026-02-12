@@ -74,7 +74,7 @@ Columns: INGREDIENT | WEIGHT | VOLUME | SCALING (%)
 \`\`\`
 
 #### Format A: Labeled Steps (baking, multi-phase recipes)
-Two-column: bold uppercase keyword label (~140px left), prose description (right).
+Single-column layout: bold uppercase keyword label (~120px left), prose description (right) in a two-column CSS grid (label + description). All steps in one continuous list — do NOT split into multiple columns or a two-column grid of step pairs.
 Common labels: MIX, BULK FERMENT, DIVIDE, PRESHAPE, PROOF, SHAPE, ASSEMBLE, BAKE, REST, TEMPER, CHILL, FRY, REDUCE, STRAIN, SERVE
 
 #### Format B: Integrated Ingredient-Procedure Table (sequential recipes)
@@ -179,27 +179,23 @@ Use the exact CSS classes shown in the examples below.
 
   <h2 class="section-header">General Directions</h2>
 
-  <div class="recipe-body-grid">
-    <div class="labeled-steps">
-      <div class="step-label">Mix</div>
-      <div class="step-description">Combine <strong>water</strong> and <strong>yeast</strong>; add <strong>flour</strong>; mix on low speed to a shaggy mass; add <strong>salt</strong>; mix on medium speed to full gluten development.</div>
-      <div class="step-label">Bulk Ferment</div>
-      <div class="step-description">20–24 h at 21°C / 70°F; cover well.</div>
-      <div class="step-label">Divide</div>
-      <div class="step-description">250 g portions.</div>
-      <div class="step-label">Preshape</div>
-      <div class="step-description">Ball; cover well.</div>
-    </div>
-    <div class="labeled-steps">
-      <div class="step-label">Proof</div>
-      <div class="step-description">3 h at 21°C / 70°F, covered.</div>
-      <div class="step-label">Shape</div>
-      <div class="step-description">Hand-stretch to 30 cm / 12 in diameter.</div>
-      <div class="step-label">Assemble</div>
-      <div class="step-description">Spread sauce, distribute cheese and toppings.</div>
-      <div class="step-label">Bake</div>
-      <div class="step-description">Load into oven; rotate as needed; bake until rim is evenly leoparded.</div>
-    </div>
+  <div class="labeled-steps">
+    <div class="step-label">Mix</div>
+    <div class="step-description">Combine <strong>water</strong> and <strong>yeast</strong>; add <strong>flour</strong>; mix on low speed to a shaggy mass; add <strong>salt</strong>; mix on medium speed to full gluten development.</div>
+    <div class="step-label">Bulk Ferment</div>
+    <div class="step-description">20–24 h at 21°C / 70°F; cover well.</div>
+    <div class="step-label">Divide</div>
+    <div class="step-description">250 g portions.</div>
+    <div class="step-label">Preshape</div>
+    <div class="step-description">Ball; cover well.</div>
+    <div class="step-label">Proof</div>
+    <div class="step-description">3 h at 21°C / 70°F, covered.</div>
+    <div class="step-label">Shape</div>
+    <div class="step-description">Hand-stretch to 30 cm / 12 in diameter.</div>
+    <div class="step-label">Assemble</div>
+    <div class="step-description">Spread sauce, distribute cheese and toppings.</div>
+    <div class="step-label">Bake</div>
+    <div class="step-description">Load into oven; rotate as needed; bake until rim is evenly leoparded.</div>
   </div>
 </div>
 
