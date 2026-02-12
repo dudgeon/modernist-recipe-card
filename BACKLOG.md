@@ -50,6 +50,11 @@ Items below are explicitly deferred. They may inform v1 decisions (e.g., data mo
 - [ ] Format selection (Format A vs Format B) or auto-detection
 - [ ] Editable output (tweak ingredients, steps after generation)
 
+### Deployment & Previews
+- [ ] Migrate frontend hosting from GitHub Pages to Cloudflare Pages for branch preview support
+- [ ] Each PR/branch gets auto-preview URL (`<branch>.project.pages.dev`)
+- [ ] Evaluate moving worker into Cloudflare Pages Functions for unified deploys
+
 ### Infrastructure
 - [ ] Rate limiting to manage API costs
 - [ ] Usage analytics/monitoring
